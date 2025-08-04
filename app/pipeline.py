@@ -4,6 +4,7 @@ import numpy as np
 import sys
 import time
 from faster_whisper import WhisperModel, BatchedInferencePipeline
+from difflib import SequenceMatcher
 
 MODEL_SIZE = "tiny"
 LANGUAGE = "en"
@@ -11,15 +12,15 @@ SAMPLE_RATE = 16_000
 BLOCK_MS = 1
 BLOCK_SAMPLES = SAMPLE_RATE * BLOCK_MS // 1000
 
-
 TRANSCRIBE_RATE = 0.3
-
-# TODO: sentence pause
+SILENCE_TOL = 1.2
+WINDOW_LIMIT = 20
 
 q = queue.Queue()
 model = WhisperModel(MODEL_SIZE, compute_type="int8")
 pipe = BatchedInferencePipeline(model=model)
 
+# words to be flushed and corrections
 def flush_and_corrects(prev, new):
     ops = {"flush_words": [], "replace": []}
 
@@ -27,22 +28,32 @@ def flush_and_corrects(prev, new):
     if len(new) > len(prev):
         ops["flush_words"] = new[len(prev):]
     
-    overlap = min(len(new), len(prev))
-
+    sm = SequenceMatcher(a=prev, b=new)
+    matched = sm.find_longest_match(0, len(prev), 0, len(new))
     
-    for i in range(overlap):
-        if prev[i] != new[i]:
-            ops["replace"].append((prev[i], new[i]))
+    prev_midex = matched.a + matched.size
+    new_mindex = matched.b + matched.size
+
+    old_rem = prev[prev_midex:]
+    new_rem = new[new_mindex:]
+
+    overlap = min(len(old_rem), len(new_rem))
+    
+    for i, k in zip(old_rem[:overlap], new_rem[:overlap]):
+        if i != k:
+            ops["replace"].append((i, k))
         else:
             continue
 
     return ops
 
 
-
+# adding audio to queue
 def cb(indata, frames, t, status):
     q.put(indata[:, 0].copy())
 
+
+# transcription loop
 def loop():
     buf = np.zeros(0, dtype=np.float32)
     last_trans = time.monotonic()
@@ -56,6 +67,7 @@ def loop():
                 buf = np.concatenate((buf, data))
                 now = time.monotonic()
 
+
                 if now - last_trans >= TRANSCRIBE_RATE:
                     segments, _ = pipe.transcribe(buf, language=LANGUAGE, beam_size=10, batch_size=10, vad_filter=True)
 
@@ -66,36 +78,30 @@ def loop():
                     
                     ops = flush_and_corrects(prev, new)
                     flush_words = ops["flush_words"]
-                    replace = ops["replace"]
 
-                    if new != []:
+                    if flush_words != []:
                         text = ' '.join(new)
                         print(text, flush=True)
-
-                    for r in replace:
-                        old_word, new_word = r
-                        print(f"replace: {old_word} -> {new_word}")
-                    
-
-                    print()
-                    if len(new) <= len(prev):
-                        silence += TRANSCRIBE_RATE
-                    else:
-                        prev = new
-                    
-                    
+                        silence = 0.0
                         
-                    if silence > 0.5:
+
+                    for r in ops["replace"]:
+                        old_word, new_word = r
+                        # print(f"replace: {old_word} -> {new_word}")
+                    
+                    # print()
+
+                    silence += now - last_trans
+                    prev = new                    
+                        
+                    if silence >= SILENCE_TOL or len(new) >= WINDOW_LIMIT:
                         print("reset window")
-                        # every window reset -> send to mt -> tts
                         buf = np.zeros(0, dtype=np.float32)
                         silence = 0.0
                         prev = []
                         
 
                     last_trans = time.monotonic()
-
-                    
                      
             except KeyboardInterrupt:
                 print("\nexiting...")
