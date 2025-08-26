@@ -1,6 +1,5 @@
 /.venv
 /.env
 /app/__pycache__
-/app/pipeline/models/small100_int8/__pycache__
-/app/pipeline/models/small100_int8/.cache
-/app/pipeline/models/small100_int8/
+/app/pipeline/models
+/app/pipeline/voices
