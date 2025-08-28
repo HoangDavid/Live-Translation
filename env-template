@@ -1,0 +1,18 @@
+# Signaling URL
+SIGNALING_URL=
+
+# Machine translation directory
+MT_VI_FR=models/mt-vi-fr
+MT_FR_VI=models/mt-fr-vi
+MT_VI_EN=models/mt-vi-en
+MT_EN_VI=models/mt-en-vi
+MT_FR_EN=models/mt-fr-en
+MT_EN_FR=models/mt-en-fr
+
+# Voices directory
+EN_MODEL=app/pipeline/voices/en/en_US-amy-low.onnx
+EN_MODEL_CONFIG=app/pipeline/voices/en/en_US-amy-low.onnx.json
+FR_MODEL=app/pipeline/voices/fr/fr_FR-gilles-low.onnx
+FR_MODEL_CONFIG=app/pipeline/voices/fr/fr_FR-gilles-low.onnx.json
+VI_MODEL=app/pipeline/voices/vi/vi_VN-vais1000-medium.onnx
+VI_MODEL_CONFIG=app/pipeline/voices/vi/vi_VN-vais1000-medium.onnx.json
