@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[2]
 load_dotenv(ROOT / ".env") 
 
 @dataclass
-class Worker:
+class TTSTask:
     task: asyncio.Task
     inboundQ: asyncio.Queue
     outboundQ: asyncio.Queue
@@ -32,7 +32,7 @@ class TTS:
         print(self.configs)
 
     # Load a new tts task
-    def new_tts_task(self, inboundQ: asyncio.Queue, tgt_lang: str) -> Worker:
+    def new_tts_task(self, inboundQ: asyncio.Queue, tgt_lang: str) -> TTSTask:
         loop = asyncio.get_running_loop()
         stop_evt = asyncio.Event()
         outboundQ = asyncio.Queue()
@@ -41,12 +41,12 @@ class TTS:
         # sample first to get voice model sample rate and channels
         trial = voice.synthesize("abcd")
         first = next(trial)
-        sr = first.sample_rate or getattr(voice, "sample_rate", 22050)
+        sr = first.sample_rate or getattr(voice, "sample_rate", 16000)
         ch = first.sample_channels or 1
 
         task = loop.create_task(self._worker(inboundQ, outboundQ, voice, stop_evt))
 
-        return Worker(task=task, inboundQ=inboundQ, outboundQ=outboundQ, stop_evt=stop_evt, sample_rate=sr, channel=ch)
+        return TTSTask(task=task, inboundQ=inboundQ, outboundQ=outboundQ, stop_evt=stop_evt, sample_rate=sr, channel=ch)
 
 
     # Load a worker task

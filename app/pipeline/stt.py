@@ -7,11 +7,12 @@ from dataclasses import dataclass
 from difflib import SequenceMatcher
 
 @dataclass
-class Worker:
+class STTTask:
     task: asyncio.Task
-    inbound: asyncio.Queue
-    outbound: asyncio.Queue
-    stop: asyncio.Event
+    inboundQ: asyncio.Queue
+    outboundQ: asyncio.Queue
+    stop_evt: asyncio.Event
+    language: str
 
 
 # Speech to text module
@@ -37,7 +38,7 @@ class STT:
 
 
 
-    async def new_stt_task(self, language) -> Worker:
+    async def new_stt_task(self, language) -> STTTask:
         # spawn a background stt worker task
         loop = asyncio.get_running_loop()
         stop_evt = asyncio.Event()
@@ -46,10 +47,10 @@ class STT:
         
         task = loop.create_task(self._worker(language, inboundQ, outboundQ, stop_evt))
 
-        return Worker(task=task, inbound=inboundQ, outbound=outboundQ, stop=stop_evt)
+        return STTTask(task=task, inboundQ=inboundQ, outboundQ=outboundQ, stop_evt=stop_evt, language=language)
 
 
-    async def _worker(self, language: str, inbound: asyncio.Queue, outbound: asyncio.Queue, stop: asyncio.Event):
+    async def _worker(self, language: str, inboundQ: asyncio.Queue, outboundQ: asyncio.Queue, stop: asyncio.Event):
         buf = np.zeros(0, dtype=np.float32)
         last_ts = asyncio.get_event_loop().time()
         prev_tokens = []
@@ -58,7 +59,7 @@ class STT:
             while not stop.is_set():
                 try:
                     # get and add audio chunk to buffering
-                    chunk = await asyncio.wait_for(inbound.get(), timeout=0.01)
+                    chunk = await asyncio.wait_for(inboundQ.get(), timeout=0.01)
 
                 except asyncio.TimeoutError:
                     # yeild
@@ -81,7 +82,7 @@ class STT:
                 now = asyncio.get_event_loop().time()
                 if now - last_ts >= self.transcribe_rate:
                     prev_tokens, ops = await self._transcribe(prev_tokens, language, buf)
-                    outbound.put_nowait(ops)
+                    outboundQ.put_nowait(ops)
                     last_ts = now
                 
                 # yeild
