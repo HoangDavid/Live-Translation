@@ -1,1 +1,3 @@
-# stt-tts-pipeline
+# Live Translation Pipeline
+
+Currently a work in progress
