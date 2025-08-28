@@ -25,10 +25,12 @@ pip install -r requirements.txt
 Then update your model url in the .env file
 
 3. Run the service:
-you can run test indepedently for now by running each layers in /pipeline, run:
+You can run test indepedently for now by running each layers in /pipeline and run:
+```bash
 python app/pipeline/stt.py
 python app/pipeline/mt.py
 python app/pipeline/tts.py
+```
 
 Note: running thet test required you to open your mic, please have that enabled before runnnig the tests.
 
