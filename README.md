@@ -32,5 +32,5 @@ python app/pipeline/mt.py
 python app/pipeline/tts.py
 ```
 
-Note: running thet test required you to open your mic, please have that enabled before runnnig the tests.
+Note: running the test required you to open your mic, please have that enabled before running the tests.
 
