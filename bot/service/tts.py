@@ -1,6 +1,6 @@
 import asyncio, os, concurrent, functools
 import numpy as np
-import sounddevice as sd
+# import sounddevice as sd
 from dataclasses import dataclass
 from piper.voice import PiperVoice, SynthesisConfig, Iterable, AudioChunk
 from pathlib import Path
@@ -85,39 +85,39 @@ class TTS:
     
 
 
-def write_chunk(stream, chunk, ch):
-    # Prefer float32 from chunk (your print shows audio_float_array populated)
-    if getattr(chunk, "audio_float_array", None) is not None:
-        buf = chunk.audio_float_array
-    elif getattr(chunk, "audio", None):  # int16 bytes fallback
-        buf = np.frombuffer(chunk.audio, dtype=np.int16).astype(np.float32) / 32768.0
-    else:
-        return
-    if ch > 1 and buf.ndim == 1:
-        buf = buf.reshape(-1, ch)
-    stream.write(buf)
+# def write_chunk(stream, chunk, ch):
+#     # Prefer float32 from chunk (your print shows audio_float_array populated)
+#     if getattr(chunk, "audio_float_array", None) is not None:
+#         buf = chunk.audio_float_array
+#     elif getattr(chunk, "audio", None):  # int16 bytes fallback
+#         buf = np.frombuffer(chunk.audio, dtype=np.int16).astype(np.float32) / 32768.0
+#     else:
+#         return
+#     if ch > 1 and buf.ndim == 1:
+#         buf = buf.reshape(-1, ch)
+#     stream.write(buf)
     
 
-async def test():
-    tts = TTS()
-    inboundQ = asyncio.Queue()
-    inboundQ.put_nowait("Xin chào. Mình tên là Việt. Bạn tên là gì?")
-    inboundQ.put_nowait( "Chào bạn. Mình tên là Hoàng.  Bạn khoẻ không nhỉ?")
-    worker = tts.new_tts_task(inboundQ, "vi")
+# async def test():
+#     tts = TTS()
+#     inboundQ = asyncio.Queue()
+#     inboundQ.put_nowait("Xin chào. Mình tên là Việt. Bạn tên là gì?")
+#     inboundQ.put_nowait( "Chào bạn. Mình tên là Hoàng.  Bạn khoẻ không nhỉ?")
+#     worker = tts.new_tts_task(inboundQ, "vi")
 
-    with sd.OutputStream(samplerate=worker.sample_rate, channels=worker.channel, dtype="float32") as stream:
-        while True:
-            try:
-                chunk = await asyncio.wait_for(worker.outboundQ.get(), timeout=0.01)
-            except TimeoutError:
-                await asyncio.sleep(0)
-                continue
+#     with sd.OutputStream(samplerate=worker.sample_rate, channels=worker.channel, dtype="float32") as stream:
+#         while True:
+#             try:
+#                 chunk = await asyncio.wait_for(worker.outboundQ.get(), timeout=0.01)
+#             except TimeoutError:
+#                 await asyncio.sleep(0)
+#                 continue
             
 
-            write_chunk(stream, chunk, worker.channel)
+#             write_chunk(stream, chunk, worker.channel)
 
 
-if __name__ == "__main__":
-    asyncio.run(test())
+# if __name__ == "__main__":
+#     asyncio.run(test())
 
 

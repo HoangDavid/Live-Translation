@@ -1,0 +1,12 @@
+services:
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+  orchestrator:
+    build:
+      context: .
+      dockerfile: dockerfile
+    image: bot-orchestrator:local
+    ports: ["7001:7001"]
+    
+# To run: docker compose up --build 

@@ -1,4 +1,3 @@
-import sounddevice as sd
 import numpy as np
 import functools, sys, asyncio, concurrent.futures
 from nanoid import generate
@@ -171,32 +170,32 @@ class STT:
 
         
 
-async def test():
-    stt = STT()
-    worker = await stt.new_stt_task("en")
-    loop = asyncio.get_running_loop()
+# async def test():
+#     stt = STT()
+#     worker = await stt.new_stt_task("en")
+#     loop = asyncio.get_running_loop()
 
-    def cb(indata, frames, t, status):
-        loop.call_soon_threadsafe(
-            worker.inbound.put_nowait,
-            indata[:, 0].copy()
-        )
+#     def cb(indata, frames, t, status):
+#         loop.call_soon_threadsafe(
+#             worker.inboundQ.put_nowait,
+#             indata[:, 0].copy()
+#         )
     
-    with sd.InputStream(samplerate=stt.sample_rate, channels=1, dtype="float32", blocksize=stt.block_samples, callback=cb):
-        while True:
-            try:
-                await asyncio.sleep(2)
-                worker.languge = "vi"
-            except KeyboardInterrupt:
-                break
+#     with sd.InputStream(samplerate=stt.sample_rate, channels=1, dtype="float32", blocksize=stt.block_samples, callback=cb):
+#         while True:
+#             try:
+#                 await asyncio.sleep(2)
+#                 worker.languge = "vi"
+#             except KeyboardInterrupt:
+#                 break
     
-    worker.stop.set()
-    await worker.task
-    print("\nexiting...")
+#     worker.stop.set()
+#     await worker.task
+#     print("\nexiting...")
 
 
-if __name__ == "__main__":
-    asyncio.run(test())
+# if __name__ == "__main__":
+#     asyncio.run(test())
 
         
     

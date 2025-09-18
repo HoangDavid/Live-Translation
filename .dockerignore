@@ -1,0 +1,7 @@
+.venv/
+demo/
+README.md
+LICENSE
+bot_orchestrator/__pycache__
+bot/mt_models/
+bot/voice_models/

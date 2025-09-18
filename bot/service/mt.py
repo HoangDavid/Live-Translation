@@ -1,4 +1,3 @@
-import sentencepiece as spm
 import sys, concurrent, asyncio, functools, os
 from transformers import MarianMTModel, MarianTokenizer
 from dataclasses import dataclass

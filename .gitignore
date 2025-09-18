@@ -1,5 +1,5 @@
 /.venv
 /.env
-/app/__pycache__
-/app/pipeline/models
-/app/pipeline/voices
+/bot_orchestrator/__pycache__
+# /bot/service/mt_models
+# /bot/service/voice_models
