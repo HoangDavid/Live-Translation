@@ -8,6 +8,14 @@ app = FastAPI()
 
 @app.post("/spawn")
 async def spawn():
+
+    '''
+    TODO:
+    - Spawn a bot process + a bot designated channel
+    - Send audio from client via  and send live captions from redis subcription using WS
+    '''
+    
+    
     return {"status": "start running", "bot_id": 1}
 
 @app.post("/kill")

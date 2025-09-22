@@ -4,12 +4,12 @@ from controller import Controller
 from typing import Literal
 
 # Listen and Push to Redis
-REDIS_URL = os.getenv()
-BOT_CHAN_IN = os.getenv()
-BOT_CHAN_OUT = os.getenv()
+REDIS_URL = os.getenv("REDIS_URL")
+BOT_CHAN_IN = os.getenv("BOT_CHAN_IN")
+BOT_CHAN_OUT = os.getenv("BOT_CHAN_OUT")
 
 
-async def listen(c: Controller):
+async def listener(c: Controller):
     r = redis.from_url(REDIS_URL, decode_responses=True)
     ps = r.pubsub()
 
@@ -25,18 +25,22 @@ async def listen(c: Controller):
         await r.close()
 
 
-async def publish(c: Controller):
+async def sender(c: Controller):
     r = redis.from_url(REDIS_URL, decode_responses=True)
     try:
-        pass
-        # while True:
-        #     asyncio.sleep(0)
+        while True:
+            asyncio.sleep(0)
     finally:
         await r.close()
 
 
 async def main():
     controller = Controller()
+    await asyncio.gather(listener(c=controller), sender(c=controller))
+
+
+if __name__ == "__main__":
+    main()
     
     
 

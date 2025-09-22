@@ -5,7 +5,7 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-WORKDIR /Live-Translation
+WORKDIR /bot_orchestrator
 
 COPY requirements.bot_orchestrator.txt .
 

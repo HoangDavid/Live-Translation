@@ -2,11 +2,24 @@ services:
   redis:
     image: redis:7
     ports: ["6379:6379"]
+    depends_on: []
   orchestrator:
     build:
-      context: .
-      dockerfile: dockerfile
+      context: ./bot_orchestrator
+      dockerfile: Dockerfile
     image: bot-orchestrator:local
     ports: ["7001:7001"]
+    depends_on: [redis]
+  demo:  
+    build:
+      context: ./demo
+      dockerfile: Dockerfile
+    image: demo:local
+    ports: ["5173:5173"]
+    depends_on: [orchestrator]
+      
     
 # To run: docker compose up --build 
+# To run without rebuilding docker compose up 
+
+# To run redis separately: docker run -d --name redis-local -p 6379:6379 redis:7
